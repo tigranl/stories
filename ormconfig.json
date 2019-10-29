@@ -1,0 +1,8 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "database": "stories",
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "synchronize": true
+}

@@ -1,23 +1,75 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { Test } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import { AppService} from '../src/app.service';
+import { INestApplication } from '@nestjs/common';
 
-describe('AppController (e2e)', () => {
-  let app;
+describe('App', () => {
+  let app: INestApplication;
+  const appService = {
+    getStories: () => [{
+      id: 1,
+      title: 'title',
+      author: 'author',
+      message: 'message'
+    }],
+    createStory: () => ({id: 1}),
+    updateStory: () => ({status: 'success'})
+  };
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    const module = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+        .overrideProvider(AppService)
+        .useValue(appService)
+        .compile();
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it(`/GET stories`, () => {
     return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+        .get('/stories')
+        .expect(200)
+        .expect(
+            appService.getStories()
+        );
+  });
+
+  it('POST /story', () => {
+    return request(app.getHttpServer())
+        .post('/story')
+        .send({
+          title: 'title',
+          author: 'author',
+          message: 'message'
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .expect(
+            appService.createStory()
+        )
+  });
+
+  it('PUT /story/<id>', () => {
+    return request(app.getHttpServer())
+        .put('/story/1')
+        .send({
+          title: 'new title',
+          author: 'author',
+          message: 'message'
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .expect(
+            appService.updateStory()
+        )
+  });
+  afterAll(async () => {
+    await app.close();
   });
 });
