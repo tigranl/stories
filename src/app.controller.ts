@@ -19,7 +19,11 @@ export class AppController {
 
   @Put('story/:id')
   async updateStory(@Param('id') id: string, @Body() story: StoryDTO) {
-    await this.appService.updateStory(id, story);
-    return {status: 'success'};
+    try {
+      await this.appService.updateStory(id, story);
+      return {status: 'success'};
+    } catch (e) {
+      return {status: 'error'};
+    }
   }
 }
