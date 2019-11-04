@@ -1,25 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Story } from './story.entity';
+import { Injectable, Inject } from '@nestjs/common';
+import {Storage} from './utils';
 import { StoryDTO } from './story.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AppService {
   constructor(
-      @InjectRepository(Story)
-      private readonly stories: Repository<Story>
+      @Inject(Storage)
+      private readonly stories: Storage
   ) {}
 
   async createStory(story: StoryDTO ): Promise<any> {
-    return this.stories.save(story).then(result => ({id: result.id}) );
+    return await this.stories.createStories(story);
   }
 
   async getStories(): Promise<any> {
-    return await this.stories.find();
+    return await this.stories.getStories();
   }
 
   async updateStory(id: string, story: StoryDTO): Promise<any> {
-    return await this.stories.update(Number(id), story);
+    return await this.stories.updateStory(Number(id), story);
   }
 }
